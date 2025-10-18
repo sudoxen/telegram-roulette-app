@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Web App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            image-rendering: pixelated;
+            -webkit-font-smoothing: none;
+            -moz-osx-font-smoothing: none;
+        }
+
+        body {
+            background-color: #000000;
+            font-family: 'Courier New', monospace;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        /* Баланс в правом верхнем углу */
+        .balance {
+            position: absolute;
+            top: 30px;
+            right: 20px;
+            color: #00ff00;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 3px #00ff00;
+            letter-spacing: 1px;
+        }
+
+        /* Референс в левом верхнем углу */
+        .referral {
+            position: absolute;
+            top: 30px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            font-weight: bold;
+        }
+
+        /* Центральная область для рулетки */
+        .roulette-container {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 280px;
+            height: 280px;
+            background: rgba(0, 255, 0, 0.08);
+            border: 3px solid #00ff00;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #00ff00;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 0 0 3px #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        /* Овал с множителями */
+        .multiplier-oval {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 255, 0, 0.15);
+            border: 2px solid #00ff00;
+            border-radius: 30px;
+            padding: 12px 40px;
+            display: flex;
+            gap: 40px;
+            box-shadow: 0 0 8px rgba(0, 255, 0, 0.2);
+        }
+
+        .multiplier {
+            color: #00ff00;
+            font-size: 22px;
+            font-weight: bold;
+            text-shadow: 0 0 3px #00ff00;
+            letter-spacing: 1px;
+        }
+
+        /* Кнопка Play */
+        .play-button {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #00ff00;
+            color: #000000;
+            border: none;
+            padding: 20px 60px;
+            border-radius: 15px;
+            font-size: 26px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 3px #00ff00;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+            letter-spacing: 1px;
+            width: 280px;
+        }
+
+        .play-button:active {
+            background: #00cc00;
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.8);
+            transform: translateX(-50%) scale(0.98);
+        }
+
+        /* Пиксельный эффект для всех текстов */
+        .balance, .referral, .multiplier, .play-button, .roulette-container {
+            font-smooth: never;
+            -webkit-font-smoothing: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Референс в левом верхнем углу -->
+    <div class="referral">🔗REFFERAL</div>
+
+    <!-- Баланс в правом верхнем углу -->
+    <div class="balance">567 ⭐</div>
+
+    <!-- Область рулетки -->
+    <div class="roulette-container">
+        РУЛЕТКА
+    </div>
+
+    <!-- Овал с множителями - ПОДНЯТ ВВЕРХ -->
+    <div class="multiplier-oval">
+        <div class="multiplier">1X</div>
+        <div class="multiplier">10X</div>
+    </div>
+
+    <!-- Кнопка Play - ПОДНЯТА ВВЕРХ -->
+    <button class="play-button">Play 200⭐</button>
+
+    <script>
+        // Инициализация Telegram Web App
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        // Настройка цветовой схемы
+        tg.setHeaderColor('#000000');
+        tg.setBackgroundColor('#000000');
+        
+        // Показ главной кнопки Telegram
+        tg.MainButton.text = "Сделать ставку 200⭐";
+        tg.MainButton.show();
+        
+        let balance = 567;
+        
+        // Обработчик кнопки Play
+        document.querySelector('.play-button').addEventListener('click', function() {
+            if (balance >= 200) {
+                // Анимация рулетки
+                const roulette = document.querySelector('.roulette-container');
+                roulette.style.animation = 'spin 2s ease-in-out';
+                
+                // Случайный результат
+                const multipliers = [1, 10];
+                const result = multipliers[Math.floor(Math.random() * multipliers.length)];
+                const win = 200 * result;
+                
+                setTimeout(() => {
+                    balance = balance - 200 + win;
+                    document.querySelector('.balance').textContent = balance + ' ⭐';
+                    
+                    if (result === 10) {
+                        tg.showAlert(`🎉 ДЖЕКПОТ! Вы выиграли ${win}⭐`);
+                        // Отправляем данные боту
+                        tg.sendData(JSON.stringify({
+                            action: 'bet_result',
+                            bet: 200,
+                            multiplier: result,
+                            win: win,
+                            balance: balance
+                        }));
+                    } else {
+                        tg.showAlert(`Множитель ${result}X. Выигрыш: ${win}⭐`);
+                    }
+                }, 2000);
+            } else {
+                tg.showAlert('Недостаточно звезд для ставки!');
+            }
+        });
+        
+        // Обработчик главной кнопки Telegram
+        tg.MainButton.onClick(() => {
+            document.querySelector('.play-button').click();
+        });
+        
+        // Добавляем CSS анимацию
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: translate(-50%, -50%) rotate(0deg); }
+                100% { transform: translate(-50%, -50%) rotate(720deg); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        console.log('Telegram Web App инициализирован!');
+        console.log('User ID:', tg.initDataUnsafe?.user?.id);
+    </script>
+</body>
+</html>
