@@ -31,7 +31,8 @@ dp = Dispatcher()
 def get_webapp_url(balance, user_id):
     """Генерирует URL Web App с актуальным балансом и версией"""
     timestamp = int(time.time())
-    return f"{WEB_APP_URL}?balance={balance}&user_id={user_id}&v={timestamp}&t={timestamp}"
+    # Добавляем баланс в URL и в хэш для надежности
+    return f"{WEB_APP_URL}?balance={balance}&user_id={user_id}&v={timestamp}#balance={balance}"
 
 @dp.message(Command("start"))
 async def start_command(message):
