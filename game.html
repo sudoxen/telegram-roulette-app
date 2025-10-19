@@ -446,18 +446,32 @@
         
         // Отправка данных боту
         function sendDataToBot(gameData) {
+            console.log('=== ОТПРАВКА ДАННЫХ БОТУ ===');
+            console.log('tg объект:', tg);
+            console.log('tg.sendData существует?', typeof tg.sendData);
+            console.log('Данные для отправки:', gameData);
+            
             try {
-                if (tg.sendData) {
-                    tg.sendData(JSON.stringify(gameData));
-                    updateStatus('📤 Данные отправлены');
-                    console.log('Данные отправлены боту:', gameData);
+                if (tg && typeof tg.sendData === 'function') {
+                    const dataString = JSON.stringify(gameData);
+                    console.log('Отправляем JSON:', dataString);
+                    tg.sendData(dataString);
+                    updateStatus('📤 Отправлено боту!', '#00ff00');
+                    console.log('✅ ДАННЫЕ ОТПРАВЛЕНЫ БОТУ!');
+                    
+                    // Показываем уведомление
+                    setTimeout(() => {
+                        updateStatus('✅ Готов к игре', '#00d9ff');
+                    }, 2000);
                 } else {
-                    updateStatus('⚠️ Оффлайн режим');
-                    console.log('sendData недоступен, работаем оффлайн');
+                    updateStatus('⚠️ Оффлайн (тест)', '#ffaa00');
+                    console.warn('⚠️ tg.sendData недоступен - работаем в тестовом режиме');
+                    console.log('Данные НЕ отправлены, но сохранены локально');
                 }
             } catch (error) {
-                console.error('Ошибка отправки данных:', error);
-                updateStatus('❌ Ошибка отправки');
+                console.error('❌ ОШИБКА отправки данных:', error);
+                console.error('Stack:', error.stack);
+                updateStatus('❌ Ошибка: ' + error.message, '#ff4444');
             }
         }
         
