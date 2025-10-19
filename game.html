@@ -304,18 +304,35 @@
     <button class="play-button" id="playBtn">🎲 ИГРАТЬ (200⭐)</button>
 
     <script>
-        // Telegram Web App API
-        const tg = window.Telegram.WebApp;
+        // Telegram Web App API с проверкой
+        let tg = null;
         
-        console.log('🎰 Telegram WebApp инициализирован');
-        console.log('tg.initDataUnsafe:', tg.initDataUnsafe);
-        console.log('tg.initData:', tg.initData);
-        
-        // Расширяем на весь экран
-        tg.expand();
-        tg.setHeaderColor('#0a0a0a');
-        tg.setBackgroundColor('#0a0a0a');
-        tg.disableVerticalSwipes();
+        // Проверяем доступность Telegram WebApp API
+        if (window.Telegram && window.Telegram.WebApp) {
+            tg = window.Telegram.WebApp;
+            console.log('✅ Telegram WebApp инициализирован');
+            console.log('tg.initDataUnsafe:', tg.initDataUnsafe);
+            console.log('tg.initData:', tg.initData);
+            
+            // Расширяем на весь экран
+            tg.expand();
+            tg.setHeaderColor('#0a0a0a');
+            tg.setBackgroundColor('#0a0a0a');
+            tg.disableVerticalSwipes();
+        } else {
+            console.warn('⚠️ Telegram WebApp API недоступен - создаем заглушку');
+            // Создаем минимальную заглушку
+            tg = {
+                initDataUnsafe: {},
+                initData: '',
+                expand: () => {},
+                setHeaderColor: () => {},
+                setBackgroundColor: () => {},
+                disableVerticalSwipes: () => {},
+                sendData: () => console.log('Заглушка: sendData вызван'),
+                showPopup: () => console.log('Заглушка: showPopup вызван')
+            };
+        }
         
         // Элементы
         const balanceEl = document.getElementById('balance');
