@@ -22,8 +22,8 @@ BOT_TOKEN = os.getenv('BOT_TOKEN')
 if not BOT_TOKEN:
     raise ValueError("❌ BOT_TOKEN не найден! Создай файл .env с токеном бота.")
 
-# 🌐 URL Web App (из .env или дефолтный)
-WEB_APP_URL = os.getenv('WEB_APP_URL', 'https://sudoxen.github.io/telegram-roulette-app/')
+# 🌐 URL Web App (из .env или дефолтный) - Используем app.html для обхода кэша
+WEB_APP_URL = os.getenv('WEB_APP_URL', 'https://sudoxen.github.io/telegram-roulette-app/app.html')
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
