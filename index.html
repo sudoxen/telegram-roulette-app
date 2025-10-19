@@ -359,16 +359,22 @@
             updateStatus('🔍 Получение баланса...', '#ffaa00');
             
             try {
+                console.log('🔍 Начало загрузки баланса...');
+                console.log('📍 URL:', window.location.href);
+                
                 // Метод 1: URL параметры
                 const urlParams = new URLSearchParams(window.location.search);
                 const balanceParam = urlParams.get('balance');
                 
+                console.log('💰 Balance параметр:', balanceParam);
+                
                 if (balanceParam) {
                     const newBalance = parseInt(balanceParam);
-                    if (!isNaN(newBalance) && newBalance > 0) {
+                    console.log('🔢 Parsed balance:', newBalance);
+                    if (!isNaN(newBalance) && newBalance >= 0) {
                         updateBalance(newBalance);
-                        updateStatus('✅ Баланс загружен');
-                        console.log('Баланс загружен из URL:', newBalance);
+                        updateStatus('✅ Готов к игре', '#00d9ff');
+                        console.log('✅ Баланс загружен из URL:', newBalance);
                         return;
                     }
                 }
@@ -505,12 +511,17 @@
         // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
             updateStatus('🚀 Инициализация...');
-            
-            setTimeout(() => {
-                getBalanceFromUrl();
-                updateStatus('✅ Готов к игре');
-            }, 500);
+            getBalanceFromUrl();
         });
+        
+        // Также вызываем сразу (на случай если DOMContentLoaded уже прошел)
+        if (document.readyState === 'loading') {
+            // DOM еще загружается, подождем
+        } else {
+            // DOM уже загружен
+            updateStatus('🚀 Запуск...');
+            getBalanceFromUrl();
+        }
         
         // Обработка ошибок
         window.addEventListener('error', function(error) {
