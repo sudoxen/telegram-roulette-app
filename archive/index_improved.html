@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎰 Казино Рулетка</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        /* Анимированный фон */
+        .background-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 0, 102, 0.1) 0%, transparent 50%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Баланс */
+        .balance-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #000;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 25px;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            z-index: 100;
+        }
+
+        /* Статус подключения */
+        .connection-status {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #00ff88;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            border: 1px solid #00ff88;
+        }
+
+        /* Рулетка */
+        .roulette-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;
+            height: 220px;
+            border: 4px solid #00ff88;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ff0066 0deg 18deg,
+                #000000 18deg 36deg,
+                #ff0066 36deg 54deg,
+                #000000 54deg 72deg,
+                #ff0066 72deg 90deg,
+                #000000 90deg 108deg,
+                #ff0066 108deg 126deg,
+                #000000 126deg 144deg,
+                #ff0066 144deg 162deg,
+                #000000 162deg 180deg,
+                #ff0066 180deg 198deg,
+                #000000 198deg 216deg,
+                #ff0066 216deg 234deg,
+                #000000 234deg 252deg,
+                #ff0066 252deg 270deg,
+                #000000 270deg 288deg,
+                #ff0066 288deg 306deg,
+                #000000 306deg 324deg,
+                #ff0066 324deg 342deg,
+                #000000 342deg 360deg
+            );
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.6);
+            position: relative;
+        }
+
+        /* Указатель рулетки */
+        .roulette-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 20px solid #ffffff;
+            z-index: 10;
+        }
+
+        /* Центр рулетки */
+        .roulette-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ffffff, #cccccc);
+            border-radius: 50%;
+            border: 2px solid #00ff88;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        /* Кнопка игры */
+        .play-button {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff0066, #ff3399);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(255, 0, 102, 0.6);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .play-button:hover {
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 0 40px rgba(255, 0, 102, 0.8);
+        }
+
+        .play-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Информация о ставке */
+        .bet-info {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #ffffff;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid #333;
+        }
+
+        /* Результат */
+        .result-display {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ff88;
+            padding: 15px 25px;
+            border-radius: 20px;
+            border: 2px solid #00ff88;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            display: none;
+            z-index: 20;
+        }
+
+        /* Анимация вращения */
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(1440deg); }
+        }
+
+        .spinning {
+            animation: spin 2.5s cubic-bezier(0.23, 1, 0.320, 1);
+        }
+
+        /* Эффект джекпота */
+        @keyframes jackpot {
+            0%, 100% { 
+                box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+                border-color: #ffd700;
+            }
+            50% { 
+                box-shadow: 0 0 80px rgba(255, 215, 0, 1);
+                border-color: #ffed4e;
+            }
+        }
+
+        .jackpot-effect {
+            animation: jackpot 0.5s ease-in-out 6;
+        }
+
+        /* Отзывчивость */
+        @media (max-width: 350px) {
+            .roulette-container {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .balance-container {
+                font-size: 16px;
+                padding: 8px 16px;
+            }
+            
+            .play-button {
+                padding: 15px 30px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    
+    <div class="connection-status" id="status">🔗 Подключение...</div>
+    <div class="balance-container" id="balance">0 ⭐</div>
+    
+    <div class="result-display" id="result"></div>
+    
+    <div class="roulette-container" id="roulette">
+        <div class="roulette-pointer"></div>
+        <div class="roulette-center">🎰</div>
+    </div>
+    
+    <button class="play-button" id="playBtn">🎲 ИГРАТЬ (200⭐)</button>
+    
+    <div class="bet-info">
+        <div>🎯 Ставка: 200 ⭐</div>
+        <div>🏆 Выигрыш: 200-2000 ⭐</div>
+        <div>🎲 Множители: 1X, 10X</div>
+    </div>
+
+    <script>
+        // Telegram Web App API
+        const tg = window.Telegram.WebApp;
+        
+        // Расширяем на весь экран
+        tg.expand();
+        tg.setHeaderColor('#0a0a0a');
+        tg.setBackgroundColor('#0a0a0a');
+        tg.disableVerticalSwipes();
+        
+        // Элементы
+        const balanceEl = document.getElementById('balance');
+        const statusEl = document.getElementById('status');
+        const playBtn = document.getElementById('playBtn');
+        const rouletteEl = document.getElementById('roulette');
+        const resultEl = document.getElementById('result');
+        
+        // Состояние
+        let balance = 0;
+        let isPlaying = false;
+        let gameCount = 0;
+        
+        // Функции для работы с балансом
+        function updateStatus(text, color = '#00ff88') {
+            statusEl.textContent = text;
+            statusEl.style.color = color;
+        }
+        
+        function updateBalance(newBalance) {
+            balance = newBalance;
+            balanceEl.textContent = balance + ' ⭐';
+            
+            // Обновляем кнопку
+            if (balance >= 200) {
+                playBtn.disabled = false;
+                playBtn.textContent = '🎲 ИГРАТЬ (200⭐)';
+                playBtn.style.background = 'linear-gradient(135deg, #ff0066, #ff3399)';
+            } else {
+                playBtn.disabled = true;
+                playBtn.textContent = '💰 Недостаточно средств';
+                playBtn.style.background = '#666666';
+            }
+        }
+        
+        function showResult(text, isJackpot = false) {
+            resultEl.textContent = text;
+            resultEl.style.display = 'block';
+            resultEl.style.color = isJackpot ? '#ffd700' : '#00ff88';
+            resultEl.style.borderColor = isJackpot ? '#ffd700' : '#00ff88';
+            
+            setTimeout(() => {
+                resultEl.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Получение баланса из URL
+        function getBalanceFromUrl() {
+            updateStatus('🔍 Получение баланса...', '#ffaa00');
+            
+            try {
+                // Метод 1: URL параметры
+                const urlParams = new URLSearchParams(window.location.search);
+                const balanceParam = urlParams.get('balance');
+                
+                if (balanceParam) {
+                    const newBalance = parseInt(balanceParam);
+                    if (!isNaN(newBalance) && newBalance > 0) {
+                        updateBalance(newBalance);
+                        updateStatus('✅ Баланс загружен');
+                        console.log('Баланс загружен из URL:', newBalance);
+                        return;
+                    }
+                }
+                
+                // Метод 2: localStorage (резервный)
+                const savedBalance = localStorage.getItem('casino_balance');
+                if (savedBalance) {
+                    const newBalance = parseInt(savedBalance);
+                    if (!isNaN(newBalance) && newBalance > 0) {
+                        updateBalance(newBalance);
+                        updateStatus('💾 Баланс из кэша');
+                        console.log('Баланс загружен из localStorage:', newBalance);
+                        return;
+                    }
+                }
+                
+                // По умолчанию
+                updateBalance(0);
+                updateStatus('⚠️ Баланс по умолчанию');
+                console.log('Используется баланс по умолчанию');
+                
+            } catch (error) {
+                console.error('Ошибка загрузки баланса:', error);
+                updateBalance(0);
+                updateStatus('❌ Ошибка загрузки');
+            }
+        }
+        
+        // Сохранение баланса
+        function saveBalance() {
+            try {
+                localStorage.setItem('casino_balance', balance.toString());
+            } catch (error) {
+                console.error('Ошибка сохранения баланса:', error);
+            }
+        }
+        
+        // Отправка данных боту
+        function sendDataToBot(gameData) {
+            try {
+                if (tg.sendData) {
+                    tg.sendData(JSON.stringify(gameData));
+                    updateStatus('📤 Данные отправлены');
+                    console.log('Данные отправлены боту:', gameData);
+                } else {
+                    updateStatus('⚠️ Оффлайн режим');
+                    console.log('sendData недоступен, работаем оффлайн');
+                }
+            } catch (error) {
+                console.error('Ошибка отправки данных:', error);
+                updateStatus('❌ Ошибка отправки');
+            }
+        }
+        
+        // Логика игры
+        function startGame() {
+            if (isPlaying || balance < 200) return;
+            
+            isPlaying = true;
+            gameCount++;
+            
+            updateStatus('🎲 Крутим рулетку...');
+            playBtn.disabled = true;
+            playBtn.textContent = '🔄 Крутится...';
+            
+            // Анимация вращения
+            rouletteEl.classList.add('spinning');
+            
+            // Случайный результат
+            const multipliers = [1, 1, 1, 1, 1, 1, 1, 1, 1, 10]; // 10% шанс джекпота
+            const multiplier = multipliers[Math.floor(Math.random() * multipliers.length)];
+            const bet = 200;
+            const win = bet * multiplier;
+            const newBalance = balance - bet + win;
+            
+            setTimeout(() => {
+                // Убираем анимацию
+                rouletteEl.classList.remove('spinning');
+                
+                // Обновляем баланс
+                updateBalance(newBalance);
+                saveBalance();
+                
+                // Показываем результат
+                if (multiplier === 10) {
+                    rouletteEl.classList.add('jackpot-effect');
+                    showResult(`🎉 ДЖЕКПОТ! +${win}⭐`, true);
+                    
+                    if (tg.showPopup) {
+                        tg.showPopup({
+                            title: '🎉 ДЖЕКПОТ!',
+                            message: `Поздравляем! Вы выиграли ${win} ⭐!`,
+                            buttons: [{type: 'ok', text: 'Продолжить'}]
+                        });
+                    }
+                    
+                    setTimeout(() => {
+                        rouletteEl.classList.remove('jackpot-effect');
+                    }, 3000);
+                } else {
+                    showResult(`🎯 Множитель ${multiplier}X | +${win}⭐`);
+                }
+                
+                // Отправляем данные боту
+                const gameData = {
+                    action: 'bet_result',
+                    bet: bet,
+                    multiplier: multiplier,
+                    win: win,
+                    balance: newBalance,
+                    game_number: gameCount
+                };
+                
+                sendDataToBot(gameData);
+                
+                // Восстанавливаем кнопку
+                isPlaying = false;
+                updateStatus('✅ Готов к игре');
+                
+            }, 2500);
+        }
+        
+        // Обработчики событий
+        playBtn.addEventListener('click', startGame);
+        
+        // Обработка сообщений от бота
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'balance_update') {
+                updateBalance(event.data.balance);
+                updateStatus('🔄 Баланс обновлен');
+            }
+        });
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('🚀 Инициализация...');
+            
+            setTimeout(() => {
+                getBalanceFromUrl();
+                updateStatus('✅ Готов к игре');
+            }, 500);
+        });
+        
+        // Обработка ошибок
+        window.addEventListener('error', function(error) {
+            console.error('Ошибка Web App:', error);
+            updateStatus('❌ Ошибка приложения', '#ff0066');
+        });
+        
+        // Логирование для отладки
+        console.log('🎰 Casino Web App загружен');
+        console.log('URL:', window.location.href);
+        console.log('Telegram WebApp:', tg);
+        
+    </script>
+</body>
+</html>

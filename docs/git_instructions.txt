@@ -1,0 +1,23 @@
+# Инструкции для загрузки через Git командную строку
+
+# 1. Установите Git (если не установлен): https://git-scm.com/
+# 2. Откройте PowerShell в папке с файлами
+# 3. Выполните следующие команды:
+
+# Инициализация Git репозитория
+git init
+
+# Добавление всех файлов
+git add .
+
+# Первый коммит
+git commit -m "Initial commit: Telegram Web App"
+
+# Подключение к удаленному репозиторию
+git remote add origin https://github.com/sudoxen/telegram-roulette-app.git
+
+# Создание main ветки и загрузка
+git branch -M main
+git push -u origin main
+
+# После этого GitHub Pages автоматически активируется!

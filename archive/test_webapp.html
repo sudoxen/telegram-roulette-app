@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎰 Казино Рулетка - ТЕСТ</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .balance {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #00ff88;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff88;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid #00ff88;
+        }
+
+        .debug-info {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff88;
+            font-size: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .roulette-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 3px solid #00ff88;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ff0000 0deg 18deg,
+                #000000 18deg 36deg,
+                #ff0000 36deg 54deg,
+                #000000 54deg 72deg,
+                #ff0000 72deg 90deg,
+                #000000 90deg 108deg,
+                #ff0000 108deg 126deg,
+                #000000 126deg 144deg,
+                #ff0000 144deg 162deg,
+                #000000 162deg 180deg,
+                #ff0000 180deg 198deg,
+                #000000 198deg 216deg,
+                #ff0000 216deg 234deg,
+                #000000 234deg 252deg,
+                #ff0000 252deg 270deg,
+                #000000 270deg 288deg,
+                #ff0000 288deg 306deg,
+                #000000 306deg 324deg,
+                #ff0000 324deg 342deg,
+                #000000 342deg 360deg
+            );
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        }
+
+        .play-button {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #ff0066, #ff3399);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 0, 102, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .play-button:hover {
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 0, 102, 0.8);
+        }
+
+        .test-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        .test-button {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 8px 12px;
+            font-size: 12px;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(1440deg); }
+        }
+
+        .spinning {
+            animation: spin 2s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="balance">1000 ⭐</div>
+    
+    <div class="debug-info" id="debug">
+        <div>🧪 ТЕСТОВАЯ ВЕРСИЯ WEB APP</div>
+        <div id="debug-content">Загрузка...</div>
+    </div>
+    
+    <div class="roulette-container" id="roulette"></div>
+    
+    <button class="play-button" id="playBtn">🎲 ИГРАТЬ (200⭐)</button>
+    
+    <div class="test-controls">
+        <button class="test-button" onclick="testBalance()">Тест баланса</button>
+        <button class="test-button" onclick="clearDebug()">Очистить лог</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        
+        // Настройка Telegram Web App
+        tg.expand();
+        tg.setHeaderColor('#000000');
+        tg.setBackgroundColor('#000000');
+        
+        let balance = 1000;
+        let debugLog = [];
+        
+        function addDebug(text) {
+            const now = new Date().toLocaleTimeString();
+            debugLog.push(`[${now}] ${text}`);
+            document.getElementById('debug-content').innerHTML = debugLog.slice(-8).join('<br>');
+        }
+        
+        function clearDebug() {
+            debugLog = [];
+            document.getElementById('debug-content').innerHTML = 'Лог очищен';
+        }
+        
+        function testBalance() {
+            addDebug('🧪 Тестирование получения баланса...');
+            
+            // Тест 1: URL параметры
+            const urlParams = new URLSearchParams(window.location.search);
+            const balanceParam = urlParams.get('balance');
+            addDebug(`URL balance: ${balanceParam}`);
+            
+            // Тест 2: Telegram WebApp данные
+            if (tg.initDataUnsafe) {
+                addDebug(`initDataUnsafe: ${JSON.stringify(tg.initDataUnsafe)}`);
+            }
+            
+            // Тест 3: Полный URL
+            addDebug(`Full URL: ${window.location.href}`);
+        }
+        
+        // Инициализация
+        addDebug('🚀 Инициализация Web App...');
+        addDebug(`URL: ${window.location.href}`);
+        
+        // Получение баланса из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const balanceFromUrl = urlParams.get('balance');
+        
+        if (balanceFromUrl) {
+            balance = parseInt(balanceFromUrl) || 1000;
+            addDebug(`✅ Баланс из URL: ${balance}`);
+        } else {
+            addDebug(`⚠️ Баланс не найден в URL, используем: ${balance}`);
+        }
+        
+        // Обновляем отображение
+        document.querySelector('.balance').textContent = balance + ' ⭐';
+        addDebug(`💰 Баланс установлен: ${balance}`);
+        
+        // Обработчик кнопки играть
+        document.getElementById('playBtn').addEventListener('click', function() {
+            if (balance >= 200) {
+                addDebug('🎲 Начинаем игру...');
+                
+                const roulette = document.getElementById('roulette');
+                roulette.classList.add('spinning');
+                
+                const multipliers = [1, 10];
+                const result = multipliers[Math.floor(Math.random() * multipliers.length)];
+                const win = 200 * result;
+                
+                setTimeout(() => {
+                    balance = balance - 200 + win;
+                    document.querySelector('.balance').textContent = balance + ' ⭐';
+                    
+                    addDebug(`🎯 Результат: ${result}X, выигрыш: ${win}, баланс: ${balance}`);
+                    
+                    // Отправляем данные боту
+                    if (tg.sendData) {
+                        const gameData = {
+                            action: 'bet_result',
+                            bet: 200,
+                            multiplier: result,
+                            win: win,
+                            balance: balance
+                        };
+                        
+                        tg.sendData(JSON.stringify(gameData));
+                        addDebug('📤 Данные отправлены боту');
+                    } else {
+                        addDebug('❌ sendData недоступен');
+                    }
+                    
+                    if (result === 10) {
+                        tg.showAlert(`🎉 ДЖЕКПОТ! Выигрыш: ${win}⭐`);
+                    } else {
+                        tg.showAlert(`Множитель ${result}X. Выигрыш: ${win}⭐`);
+                    }
+                    
+                    roulette.classList.remove('spinning');
+                }, 2000);
+            } else {
+                addDebug('❌ Недостаточно средств');
+                tg.showAlert('Недостаточно средств! Нужно минимум 200⭐');
+            }
+        });
+        
+        addDebug('✅ Web App готов к работе');
+    </script>
+</body>
+</html>

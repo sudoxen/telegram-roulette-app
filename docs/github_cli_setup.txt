@@ -1,0 +1,13 @@
+# Если у вас установлен GitHub CLI (gh)
+
+# 1. Войдите в GitHub CLI
+gh auth login
+
+# 2. Создайте репозиторий и загрузите файлы одной командой
+gh repo create telegram-roulette-app --public --push --source=.
+
+# 3. Включите GitHub Pages
+gh api repos/:owner/telegram-roulette-app/pages -f source[branch]=main -f source[path]=/
+
+# Готово! Ваш сайт будет доступен по адресу:
+# https://sudoxen.github.io/telegram-roulette-app/
