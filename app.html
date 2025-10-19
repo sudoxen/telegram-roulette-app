@@ -360,13 +360,19 @@
         function getBalanceFromUrl() {
             console.log('=== НАЧАЛО ЗАГРУЗКИ БАЛАНСА ===');
             console.log('URL:', window.location.href);
+            console.log('location.search:', window.location.search);
+            console.log('location.hash:', window.location.hash);
+            
+            // ВИЗУАЛЬНАЯ ОТЛАДКА - показываем URL прямо в статусе
+            updateStatus('🔍 URL: ' + window.location.search.substring(0, 30), '#ffaa00');
             
             try {
-                // Простой метод: читаем параметр balance из URL
+                // Метод 1: Читаем из query параметров
                 const urlParams = new URLSearchParams(window.location.search);
                 const balanceParam = urlParams.get('balance');
                 
                 console.log('Balance параметр:', balanceParam);
+                console.log('Все параметры:', Array.from(urlParams.entries()));
                 
                 if (balanceParam !== null && balanceParam !== undefined) {
                     const newBalance = parseInt(balanceParam);
@@ -380,7 +386,20 @@
                     }
                 }
                 
-                console.log('⚠️ Параметр balance не найден или невалиден');
+                // Метод 2: Попробуем из hash
+                console.log('⚠️ Параметр balance не найден в search, проверяем hash...');
+                if (window.location.hash) {
+                    const hashMatch = window.location.hash.match(/balance=(\d+)/);
+                    if (hashMatch) {
+                        const newBalance = parseInt(hashMatch[1]);
+                        console.log('✅ БАЛАНС ИЗ HASH:', newBalance);
+                        updateBalance(newBalance);
+                        updateStatus('✅ Готово (hash)', '#00d9ff');
+                        return true;
+                    }
+                }
+                
+                console.log('⚠️ Параметр balance не найден ни в URL, ни в hash');
                 updateBalance(0);
                 updateStatus('⚠️ Баланс 0', '#ff8800');
                 return false;
@@ -388,7 +407,7 @@
             } catch (error) {
                 console.error('❌ ОШИБКА:', error);
                 updateBalance(0);
-                updateStatus('❌ Ошибка', '#ff4444');
+                updateStatus('❌ Ошибка: ' + error.message, '#ff4444');
                 return false;
             }
         }
