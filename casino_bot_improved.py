@@ -7,16 +7,23 @@
 import asyncio
 import json
 import time
+import os
+from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup, MenuButtonWebApp, BotCommand
 from aiogram.filters import Command
 from database import db
 
-# 🔑 ТОКЕН ОТ BOTFATHER
-BOT_TOKEN = "8211492486:AAEdPWoquZmjHdDaf0e-lqLrkjn57K8q-gM"
+# � Загрузка переменных окружения из .env файла
+load_dotenv()
 
-# 🌐 URL Web App с принудительным обновлением кэша
-WEB_APP_URL = "https://sudoxen.github.io/telegram-roulette-app/"
+# �🔑 ТОКЕН ОТ BOTFATHER (из .env файла)
+BOT_TOKEN = os.getenv('BOT_TOKEN')
+if not BOT_TOKEN:
+    raise ValueError("❌ BOT_TOKEN не найден! Создай файл .env с токеном бота.")
+
+# 🌐 URL Web App (из .env или дефолтный)
+WEB_APP_URL = os.getenv('WEB_APP_URL', 'https://sudoxen.github.io/telegram-roulette-app/')
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
