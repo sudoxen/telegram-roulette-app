@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test URL</title>
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #00ff00;
+            font-family: monospace;
+            padding: 20px;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        .box {
+            background: #1a1a1a;
+            border: 2px solid #00ff00;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            word-break: break-all;
+        }
+        h1 { color: #ffd700; }
+        .big { font-size: 24px; font-weight: bold; color: #ffd700; }
+    </style>
+</head>
+<body>
+    <h1>🔍 URL TEST</h1>
+    
+    <div class="box">
+        <strong>Full URL:</strong><br>
+        <span id="url">Loading...</span>
+    </div>
+    
+    <div class="box">
+        <strong>Search params:</strong><br>
+        <span id="search">Loading...</span>
+    </div>
+    
+    <div class="box">
+        <strong>Balance param:</strong><br>
+        <span id="balance" class="big">?</span>
+    </div>
+
+    <script>
+        document.getElementById('url').textContent = window.location.href;
+        document.getElementById('search').textContent = window.location.search || '(EMPTY!)';
+        
+        const params = new URLSearchParams(window.location.search);
+        const balance = params.get('balance');
+        document.getElementById('balance').textContent = balance || 'NOT FOUND!';
+        
+        // Также в консоль
+        console.log('URL:', window.location.href);
+        console.log('Balance:', balance);
+    </script>
+</body>
+</html>
