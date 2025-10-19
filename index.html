@@ -2,6 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="version" content="2.0">
+    <title>🎰 Casino Roulette</title>
     <style>
         :root{
             --bg-black: #0a0a0a; /* deep black */
@@ -354,124 +356,40 @@
             }, 3000);
         }
         
-        // Получение баланса из URL
+        // Получение баланса из URL - УПРОЩЕННАЯ ВЕРСИЯ
         function getBalanceFromUrl() {
-            updateStatus('🔍 Загрузка...', '#ffaa00');
+            console.log('=== НАЧАЛО ЗАГРУЗКИ БАЛАНСА ===');
+            console.log('URL:', window.location.href);
             
             try {
-                console.log('🔍 Начало загрузки баланса...');
-                console.log('📍 URL:', window.location.href);
-                console.log('🔐 Telegram WebApp data:', tg.initDataUnsafe);
-                console.log('📱 Start param:', tg.initDataUnsafe.start_param);
-                
-                // Метод 1: start_param от Telegram
-                if (tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
-                    try {
-                        const startParam = tg.initDataUnsafe.start_param;
-                        console.log('📦 Start param:', startParam);
-                        
-                        // Формат: balance_200
-                        if (startParam.startsWith('balance_')) {
-                            const balanceStr = startParam.replace('balance_', '');
-                            const newBalance = parseInt(balanceStr);
-                            if (!isNaN(newBalance) && newBalance >= 0) {
-                                updateBalance(newBalance);
-                                updateStatus('✅ Готов к игре', '#00d9ff');
-                                console.log('✅ Баланс из start_param:', newBalance);
-                                return;
-                            }
-                        }
-                    } catch (e) {
-                        console.error('❌ Ошибка start_param:', e);
-                    }
-                }
-                
-                // Метод 2: URL параметры
+                // Простой метод: читаем параметр balance из URL
                 const urlParams = new URLSearchParams(window.location.search);
                 const balanceParam = urlParams.get('balance');
                 
-                console.log('💰 Balance параметр:', balanceParam);
+                console.log('Balance параметр:', balanceParam);
                 
-                if (balanceParam) {
+                if (balanceParam !== null && balanceParam !== undefined) {
                     const newBalance = parseInt(balanceParam);
-                    console.log('🔢 Parsed balance:', newBalance);
+                    console.log('Parsed balance:', newBalance);
+                    
                     if (!isNaN(newBalance) && newBalance >= 0) {
+                        console.log('✅ БАЛАНС ЗАГРУЖЕН:', newBalance);
                         updateBalance(newBalance);
-                        updateStatus('✅ Готов к игре', '#00d9ff');
-                        console.log('✅ Баланс загружен из URL:', newBalance);
-                        saveBalance(); // Сохраняем в localStorage
-                        return;
+                        updateStatus('✅ Готово', '#00d9ff');
+                        return true;
                     }
                 }
                 
-                // Метод 3: хэш URL
-                const hash = window.location.hash;
-                console.log('🔗 Hash:', hash);
-                if (hash) {
-                    const hashMatch = hash.match(/balance=(\d+)/);
-                    if (hashMatch) {
-                        const newBalance = parseInt(hashMatch[1]);
-                        console.log('🔢 Balance из hash:', newBalance);
-                        if (!isNaN(newBalance) && newBalance >= 0) {
-                            updateBalance(newBalance);
-                            updateStatus('✅ Готов к игре', '#00d9ff');
-                            console.log('✅ Баланс загружен из hash:', newBalance);
-                            saveBalance();
-                            return;
-                        }
-                    }
-                }
-                
-                // Метод 4: localStorage (резервный)
-                const savedBalance = localStorage.getItem('casino_balance');
-                if (savedBalance) {
-                    const newBalance = parseInt(savedBalance);
-                    if (!isNaN(newBalance) && newBalance >= 0) {
-                        updateBalance(newBalance);
-                        updateStatus('💾 Из кэша', '#ffd700');
-                        console.log('Баланс загружен из localStorage:', newBalance);
-                        return;
-                    }
-                }
-                
-                // По умолчанию - загружаем с сервера
-                loadBalanceFromBot();
+                console.log('⚠️ Параметр balance не найден или невалиден');
+                updateBalance(0);
+                updateStatus('⚠️ Баланс 0', '#ff8800');
+                return false;
                 
             } catch (error) {
-                console.error('❌ Ошибка загрузки баланса:', error);
+                console.error('❌ ОШИБКА:', error);
                 updateBalance(0);
                 updateStatus('❌ Ошибка', '#ff4444');
-            }
-        }
-        
-        // Загрузка баланса напрямую от бота
-        async function loadBalanceFromBot() {
-            try {
-                updateStatus('📡 Связь с ботом...', '#ffaa00');
-                
-                // Получаем user_id из URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const userId = urlParams.get('user_id');
-                
-                if (!userId) {
-                    updateBalance(0);
-                    updateStatus('⚠️ Нет ID', '#ff8800');
-                    console.log('⚠️ User ID не найден в URL');
-                    return;
-                }
-                
-                console.log('👤 User ID:', userId);
-                
-                // В реальном приложении здесь был бы запрос к API
-                // Пока просто показываем 0
-                updateBalance(0);
-                updateStatus('⚠️ Баланс: 0', '#ff8800');
-                console.log('Используется баланс по умолчанию');
-                
-            } catch (error) {
-                console.error('❌ Ошибка:', error);
-                updateBalance(0);
-                updateStatus('❌ Ошибка', '#ff4444');
+                return false;
             }
         }
         
