@@ -230,12 +230,16 @@ SQLite база с таблицей `users`:
 
 ## 🔧 Конфигурация
 
-Настройки находятся в `casino_bot_improved.py`:
+⚠️ **ВАЖНО:** Токен бота хранится в файле `.env` (не загружается в Git!)
 
-```python
-BOT_TOKEN = "8211492486:AAEdPWoquZmjHdDaf0e-lqLrkjn57K8q-gM"
-WEB_APP_URL = "https://sudoxen.github.io/telegram-roulette-app/"
+Создайте файл `.env` в корне проекта:
+
+```env
+BOT_TOKEN=ваш_токен_от_BotFather
+WEB_APP_URL=https://sudoxen.github.io/telegram-roulette-app/app.html
 ```
+
+Пример доступен в файле `.env.example`
 
 ## 📝 Changelog
 
