@@ -2,6 +2,9 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎰 Казино Рулетка</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root{
             --bg-1: #ffffff; /* white */
@@ -10,13 +13,14 @@
             --accent-deep: #0077cc; /* deeper blue */
             --gold: #ffd700; /* gold */
             --text-dark: #01303f; /* dark blue for text */
-            --muted: rgba(1,48,63,0.06);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         body {
@@ -48,7 +52,6 @@
             50% { opacity: 0.6; }
         }
 
-        /* balance badge */
         .balance-container {
             position: absolute;
             top: 18px;
@@ -63,7 +66,6 @@
             z-index: 100;
         }
 
-        /* connection status */
         .connection-status {
             position: absolute;
             top: 18px;
@@ -76,7 +78,6 @@
             border: 1px solid rgba(0,170,255,0.12);
         }
 
-        /* roulette */
         .roulette-container {
             position: absolute;
             top: 50%;
@@ -202,10 +203,6 @@
             z-index: 20;
         }
 
-    </style>
-        }
-
-        /* Анимация вращения */
         @keyframes spin {
             0% { transform: translate(-50%, -50%) rotate(0deg); }
             100% { transform: translate(-50%, -50%) rotate(1440deg); }
@@ -215,11 +212,10 @@
             animation: spin 2.5s cubic-bezier(0.23, 1, 0.320, 1);
         }
 
-        /* Эффект джекпота */
         @keyframes jackpot {
             0%, 100% { 
                 box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
-                border-color: #ffd700;
+                border-color: var(--gold);
             }
             50% { 
                 box-shadow: 0 0 80px rgba(255, 215, 0, 1);
@@ -231,7 +227,6 @@
             animation: jackpot 0.5s ease-in-out 6;
         }
 
-        /* Отзывчивость */
         @media (max-width: 350px) {
             .roulette-container {
                 width: 180px;
@@ -487,7 +482,7 @@
         // Обработка ошибок
         window.addEventListener('error', function(error) {
             console.error('Ошибка Web App:', error);
-                updateStatus('❌ Ошибка приложения', 'var(--accent-deep)');
+            updateStatus('❌ Ошибка приложения', 'var(--accent-deep)');
         });
         
         // Логирование для отладки
