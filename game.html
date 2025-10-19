@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="version" content="2.0">
+    <title>🎰 Casino Roulette</title>
+    <style>
+        :root{
+            --bg-black: #0a0a0a; /* deep black */
+            --bg-dark: #1a1a1a; /* dark gray */
+            --neon-blue: #00d9ff; /* neon cyan */
+            --neon-gold: #ffd700; /* neon gold */
+            --glow-blue: rgba(0, 217, 255, 0.6);
+            --glow-gold: rgba(255, 215, 0, 0.6);
+            --text-light: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(0, 217, 255, 0.03) 10px,
+                    rgba(0, 217, 255, 0.03) 11px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255, 215, 0, 0.03) 10px,
+                    rgba(255, 215, 0, 0.03) 11px
+                ),
+                linear-gradient(135deg, var(--bg-black) 0%, #1a0f00 50%, var(--bg-black) 100%);
+            font-family: 'Arial', sans-serif;
+            color: var(--text-light);
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        /* Неоновая анимация фона */
+        .background-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 217, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.08) 0%, transparent 40%);
+            animation: neonPulse 4s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes neonPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Неоновый баланс */
+        .balance-container {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            background: #0a0a0a;
+            color: var(--neon-gold);
+            font-size: 18px;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 28px;
+            border: 2px solid var(--neon-gold);
+            box-shadow: 
+                0 0 15px var(--glow-gold),
+                inset 0 0 5px rgba(255, 215, 0, 0.2);
+            z-index: 100;
+            text-shadow: 0 0 5px var(--glow-gold);
+        }
+
+        /* Статус подключения */
+        .connection-status {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            background: #0a0a0a;
+            color: var(--neon-blue);
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 16px;
+            border: 2px solid var(--neon-blue);
+            box-shadow: 0 0 10px var(--glow-blue);
+            text-shadow: 0 0 4px var(--glow-blue);
+        }
+
+        /* Неоновая рулетка */
+        .roulette-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;
+            height: 220px;
+            border: 4px solid var(--neon-blue);
+            border-radius: 50%;
+            background: conic-gradient(
+                rgba(0, 217, 255, 0.3) 0deg 18deg,
+                rgba(255, 215, 0, 0.3) 18deg 36deg,
+                rgba(0, 217, 255, 0.2) 36deg 54deg,
+                rgba(255, 215, 0, 0.3) 54deg 72deg,
+                rgba(0, 217, 255, 0.3) 72deg 90deg,
+                rgba(255, 215, 0, 0.3) 90deg 108deg,
+                rgba(0, 217, 255, 0.2) 108deg 126deg,
+                rgba(255, 215, 0, 0.3) 126deg 144deg,
+                rgba(0, 217, 255, 0.3) 144deg 162deg,
+                rgba(255, 215, 0, 0.3) 162deg 180deg,
+                rgba(0, 217, 255, 0.2) 180deg 198deg,
+                rgba(255, 215, 0, 0.3) 198deg 216deg,
+                rgba(0, 217, 255, 0.3) 216deg 234deg,
+                rgba(255, 215, 0, 0.3) 234deg 252deg,
+                rgba(0, 217, 255, 0.2) 252deg 270deg,
+                rgba(255, 215, 0, 0.3) 270deg 288deg,
+                rgba(0, 217, 255, 0.3) 288deg 306deg,
+                rgba(255, 215, 0, 0.3) 306deg 324deg,
+                rgba(0, 217, 255, 0.2) 324deg 342deg,
+                rgba(255, 215, 0, 0.3) 342deg 360deg
+            );
+            box-shadow: 
+                0 0 40px var(--glow-blue),
+                0 0 60px var(--glow-gold),
+                inset 0 0 30px rgba(0, 0, 0, 0.5);
+            transition: box-shadow 0.3s;
+            position: relative;
+        }
+
+        .roulette-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 20px solid var(--neon-blue);
+            z-index: 10;
+            filter: drop-shadow(0 0 8px var(--glow-blue));
+        }
+
+        .roulette-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: #0a0a0a;
+            border-radius: 50%;
+            border: 3px solid var(--neon-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 
+                0 0 20px var(--glow-gold),
+                inset 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .play-button {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0a0a0a;
+            color: var(--neon-blue);
+            border: 3px solid var(--neon-blue);
+            padding: 18px 60px;
+            font-size: 20px;
+            font-weight: 700;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 
+                0 0 20px var(--glow-blue),
+                inset 0 0 10px rgba(0, 217, 255, 0.2);
+            transition: all 0.25s ease;
+            z-index: 10;
+            text-shadow: 0 0 6px var(--glow-blue);
+            min-width: 280px;
+        }
+
+        .play-button:hover {
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 
+                0 0 30px var(--glow-blue),
+                0 0 40px var(--glow-gold),
+                inset 0 0 15px rgba(0, 217, 255, 0.3);
+            border-color: var(--neon-gold);
+            color: var(--neon-gold);
+            text-shadow: 0 0 10px var(--glow-gold);
+        }
+
+        .play-button:disabled {
+            background: #1a1a1a;
+            color: #555;
+            border-color: #333;
+            cursor: not-allowed;
+            box-shadow: none;
+            text-shadow: none;
+        }
+
+        .result-display {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0a0a0a;
+            color: var(--neon-gold);
+            padding: 15px 25px;
+            border-radius: 20px;
+            border: 3px solid var(--neon-gold);
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            display: none;
+            z-index: 20;
+            box-shadow: 
+                0 0 25px var(--glow-gold),
+                0 0 35px var(--glow-blue);
+            text-shadow: 0 0 8px var(--glow-gold);
+        }
+
+        /* Анимация вращения */
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(1440deg); }
+        }
+
+        .spinning {
+            animation: spin 2.5s cubic-bezier(0.23, 1, 0.320, 1);
+        }
+
+        /* Эффект неонового джекпота */
+        @keyframes jackpot {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 60px var(--glow-gold),
+                    0 0 80px var(--glow-blue),
+                    inset 0 0 40px rgba(255, 215, 0, 0.4);
+                border-color: var(--neon-gold);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 100px var(--glow-gold),
+                    0 0 120px var(--glow-blue),
+                    inset 0 0 60px rgba(255, 215, 0, 0.6);
+                border-color: var(--neon-blue);
+            }
+        }
+
+        .jackpot-effect {
+            animation: jackpot 0.5s ease-in-out 6;
+        }
+
+        /* Отзывчивость */
+        @media (max-width: 350px) {
+            .roulette-container {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .balance-container {
+                font-size: 16px;
+                padding: 8px 16px;
+            }
+            
+            .play-button {
+                padding: 15px 30px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    
+    <div class="connection-status" id="status">🔗 Подключение...</div>
+    <div class="balance-container" id="balance">0 ⭐</div>
+    
+    <div class="result-display" id="result"></div>
+    
+    <div class="roulette-container" id="roulette">
+        <div class="roulette-pointer"></div>
+        <div class="roulette-center">🎰</div>
+    </div>
+    
+    <button class="play-button" id="playBtn">🎲 ИГРАТЬ (200⭐)</button>
+
+    <script>
+        // Telegram Web App API
+        const tg = window.Telegram.WebApp;
+        
+        console.log('🎰 Telegram WebApp инициализирован');
+        console.log('tg.initDataUnsafe:', tg.initDataUnsafe);
+        console.log('tg.initData:', tg.initData);
+        
+        // Расширяем на весь экран
+        tg.expand();
+        tg.setHeaderColor('#0a0a0a');
+        tg.setBackgroundColor('#0a0a0a');
+        tg.disableVerticalSwipes();
+        
+        // Элементы
+        const balanceEl = document.getElementById('balance');
+        const statusEl = document.getElementById('status');
+        const playBtn = document.getElementById('playBtn');
+        const rouletteEl = document.getElementById('roulette');
+        const resultEl = document.getElementById('result');
+        
+        // Состояние
+        let balance = 0;
+        let isPlaying = false;
+        let gameCount = 0;
+        
+        // Функции для работы с балансом
+        function updateStatus(text, color = '#00d9ff') {
+            statusEl.textContent = text;
+            statusEl.style.color = color;
+        }
+        
+        function updateBalance(newBalance) {
+            balance = newBalance;
+            balanceEl.textContent = balance + ' ⭐';
+            
+            // Обновляем кнопку
+            if (balance >= 200) {
+                playBtn.disabled = false;
+                playBtn.textContent = '🎲 ИГРАТЬ (200⭐)';
+            } else {
+                playBtn.disabled = true;
+                playBtn.textContent = '💰 Недостаточно средств';
+            }
+        }
+        
+        function showResult(text, isJackpot = false) {
+            resultEl.textContent = text;
+            resultEl.style.display = 'block';
+            resultEl.style.color = isJackpot ? 'var(--gold)' : 'var(--accent-blue)';
+            resultEl.style.borderColor = isJackpot ? 'var(--gold)' : 'var(--accent-blue)';
+            
+            setTimeout(() => {
+                resultEl.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Получение баланса из URL - УПРОЩЕННАЯ ВЕРСИЯ
+        function getBalanceFromUrl() {
+            console.log('=== НАЧАЛО ЗАГРУЗКИ БАЛАНСА ===');
+            console.log('URL:', window.location.href);
+            console.log('location.search:', window.location.search);
+            console.log('location.hash:', window.location.hash);
+            
+            // Получаем user_id из Telegram Web App
+            let userId = null;
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                userId = tg.initDataUnsafe.user.id;
+                console.log('✅ User ID из Telegram:', userId);
+            }
+            
+            // ВРЕМЕННО: Устанавливаем фиксированный баланс 200 для теста
+            console.log('🧪 ТЕСТ: Устанавливаю баланс 200');
+            updateBalance(200);
+            updateStatus('✅ Тестовый баланс', '#00d9ff');
+            return true;
+            
+            /* СТАРЫЙ КОД - НЕ РАБОТАЕТ В TELEGRAM
+            // ВИЗУАЛЬНАЯ ОТЛАДКА - показываем URL прямо в статусе
+            updateStatus('🔍 URL: ' + window.location.search.substring(0, 30), '#ffaa00');
+            
+            try {
+                // Метод 1: Читаем из query параметров
+                const urlParams = new URLSearchParams(window.location.search);
+                const balanceParam = urlParams.get('balance');
+                
+                console.log('Balance параметр:', balanceParam);
+                console.log('Все параметры:', Array.from(urlParams.entries()));
+                
+                if (balanceParam !== null && balanceParam !== undefined) {
+                    const newBalance = parseInt(balanceParam);
+                    console.log('Parsed balance:', newBalance);
+                    
+                    if (!isNaN(newBalance) && newBalance >= 0) {
+                        console.log('✅ БАЛАНС ЗАГРУЖЕН:', newBalance);
+                        updateBalance(newBalance);
+                        updateStatus('✅ Готово', '#00d9ff');
+                        return true;
+                    }
+                }
+                
+                // Метод 2: Попробуем из hash
+                console.log('⚠️ Параметр balance не найден в search, проверяем hash...');
+                if (window.location.hash) {
+                    const hashMatch = window.location.hash.match(/balance=(\d+)/);
+                    if (hashMatch) {
+                        const newBalance = parseInt(hashMatch[1]);
+                        console.log('✅ БАЛАНС ИЗ HASH:', newBalance);
+                        updateBalance(newBalance);
+                        updateStatus('✅ Готово (hash)', '#00d9ff');
+                        return true;
+                    }
+                }
+                
+                console.log('⚠️ Параметр balance не найден ни в URL, ни в hash');
+                updateBalance(0);
+                updateStatus('⚠️ Баланс 0', '#ff8800');
+                return false;
+                
+            } catch (error) {
+                console.error('❌ ОШИБКА:', error);
+                updateBalance(0);
+                updateStatus('❌ Ошибка: ' + error.message, '#ff4444');
+                return false;
+            }
+            */
+        }
+        
+        // Сохранение баланса
+        function saveBalance() {
+            try {
+                localStorage.setItem('casino_balance', balance.toString());
+            } catch (error) {
+                console.error('Ошибка сохранения баланса:', error);
+            }
+        }
+        
+        // Отправка данных боту
+        function sendDataToBot(gameData) {
+            try {
+                if (tg.sendData) {
+                    tg.sendData(JSON.stringify(gameData));
+                    updateStatus('📤 Данные отправлены');
+                    console.log('Данные отправлены боту:', gameData);
+                } else {
+                    updateStatus('⚠️ Оффлайн режим');
+                    console.log('sendData недоступен, работаем оффлайн');
+                }
+            } catch (error) {
+                console.error('Ошибка отправки данных:', error);
+                updateStatus('❌ Ошибка отправки');
+            }
+        }
+        
+        // Логика игры
+        function startGame() {
+            if (isPlaying || balance < 200) return;
+            
+            isPlaying = true;
+            gameCount++;
+            
+            updateStatus('🎲 Крутим рулетку...');
+            playBtn.disabled = true;
+            playBtn.textContent = '🔄 Крутится...';
+            
+            // Анимация вращения
+            rouletteEl.classList.add('spinning');
+            
+            // Случайный результат
+            const multipliers = [1, 1, 1, 1, 1, 1, 1, 1, 1, 10]; // 10% шанс джекпота
+            const multiplier = multipliers[Math.floor(Math.random() * multipliers.length)];
+            const bet = 200;
+            const win = bet * multiplier;
+            const newBalance = balance - bet + win;
+            
+            setTimeout(() => {
+                // Убираем анимацию
+                rouletteEl.classList.remove('spinning');
+                
+                // Обновляем баланс
+                updateBalance(newBalance);
+                saveBalance();
+                
+                // Показываем результат
+                if (multiplier === 10) {
+                    rouletteEl.classList.add('jackpot-effect');
+                    showResult(`🎉 ДЖЕКПОТ! +${win}⭐`, true);
+                    
+                    if (tg.showPopup) {
+                        tg.showPopup({
+                            title: '🎉 ДЖЕКПОТ!',
+                            message: `Поздравляем! Вы выиграли ${win} ⭐!`,
+                            buttons: [{type: 'ok', text: 'Продолжить'}]
+                        });
+                    }
+                    
+                    setTimeout(() => {
+                        rouletteEl.classList.remove('jackpot-effect');
+                    }, 3000);
+                } else {
+                    showResult(`🎯 Множитель ${multiplier}X | +${win}⭐`);
+                }
+                
+                // Отправляем данные боту
+                const gameData = {
+                    action: 'bet_result',
+                    bet: bet,
+                    multiplier: multiplier,
+                    win: win,
+                    balance: newBalance,
+                    game_number: gameCount
+                };
+                
+                sendDataToBot(gameData);
+                
+                // Восстанавливаем кнопку
+                isPlaying = false;
+                updateStatus('✅ Готов к игре');
+                
+            }, 2500);
+        }
+        
+        // Обработчики событий
+        playBtn.addEventListener('click', startGame);
+        
+        // Обработка сообщений от бота
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'balance_update') {
+                updateBalance(event.data.balance);
+                updateStatus('🔄 Баланс обновлен');
+            }
+        });
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('🚀 Инициализация...');
+            getBalanceFromUrl();
+        });
+        
+        // Также вызываем сразу (на случай если DOMContentLoaded уже прошел)
+        if (document.readyState === 'loading') {
+            // DOM еще загружается, подождем
+        } else {
+            // DOM уже загружен
+            updateStatus('🚀 Запуск...');
+            getBalanceFromUrl();
+        }
+        
+        // Обработка ошибок
+        window.addEventListener('error', function(error) {
+            console.error('Ошибка Web App:', error);
+                updateStatus('❌ Ошибка приложения', 'var(--accent-deep)');
+        });
+        
+        // Логирование для отладки
+        console.log('🎰 Casino Web App загружен');
+        console.log('URL:', window.location.href);
+        console.log('Telegram WebApp:', tg);
+        
+    </script>
+</body>
+</html>
