@@ -307,6 +307,10 @@
         // Telegram Web App API
         const tg = window.Telegram.WebApp;
         
+        console.log('🎰 Telegram WebApp инициализирован');
+        console.log('tg.initDataUnsafe:', tg.initDataUnsafe);
+        console.log('tg.initData:', tg.initData);
+        
         // Расширяем на весь экран
         tg.expand();
         tg.setHeaderColor('#0a0a0a');
@@ -363,6 +367,20 @@
             console.log('location.search:', window.location.search);
             console.log('location.hash:', window.location.hash);
             
+            // Получаем user_id из Telegram Web App
+            let userId = null;
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                userId = tg.initDataUnsafe.user.id;
+                console.log('✅ User ID из Telegram:', userId);
+            }
+            
+            // ВРЕМЕННО: Устанавливаем фиксированный баланс 200 для теста
+            console.log('🧪 ТЕСТ: Устанавливаю баланс 200');
+            updateBalance(200);
+            updateStatus('✅ Тестовый баланс', '#00d9ff');
+            return true;
+            
+            /* СТАРЫЙ КОД - НЕ РАБОТАЕТ В TELEGRAM
             // ВИЗУАЛЬНАЯ ОТЛАДКА - показываем URL прямо в статусе
             updateStatus('🔍 URL: ' + window.location.search.substring(0, 30), '#ffaa00');
             
@@ -410,6 +428,7 @@
                 updateStatus('❌ Ошибка: ' + error.message, '#ff4444');
                 return false;
             }
+            */
         }
         
         // Сохранение баланса
