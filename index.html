@@ -70,7 +70,7 @@
             position: absolute;
             top: 18px;
             right: 18px;
-            background: rgba(10, 10, 10, 0.8);
+            background: #0a0a0a;
             color: var(--neon-gold);
             font-size: 18px;
             font-weight: 700;
@@ -89,12 +89,12 @@
             position: absolute;
             top: 18px;
             left: 18px;
-            background: rgba(10, 10, 10, 0.8);
+            background: #0a0a0a;
             color: var(--neon-blue);
             font-size: 12px;
             padding: 6px 12px;
             border-radius: 16px;
-            border: 1px solid var(--neon-blue);
+            border: 2px solid var(--neon-blue);
             box-shadow: 0 0 15px var(--glow-blue);
             text-shadow: 0 0 8px var(--glow-blue);
         }
@@ -160,9 +160,9 @@
             transform: translate(-50%, -50%);
             width: 40px;
             height: 40px;
-            background: rgba(10, 10, 10, 0.9);
+            background: #0a0a0a;
             border-radius: 50%;
-            border: 2px solid var(--neon-gold);
+            border: 3px solid var(--neon-gold);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -174,14 +174,14 @@
 
         .play-button {
             position: absolute;
-            bottom: 120px;
+            bottom: 80px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(10, 10, 10, 0.8);
+            background: #0a0a0a;
             color: var(--neon-blue);
-            border: 2px solid var(--neon-blue);
-            padding: 16px 36px;
-            font-size: 18px;
+            border: 3px solid var(--neon-blue);
+            padding: 18px 60px;
+            font-size: 20px;
             font-weight: 700;
             border-radius: 30px;
             cursor: pointer;
@@ -191,6 +191,7 @@
             transition: all 0.25s ease;
             z-index: 10;
             text-shadow: 0 0 10px var(--glow-blue);
+            min-width: 280px;
         }
 
         .play-button:hover {
@@ -205,7 +206,7 @@
         }
 
         .play-button:disabled {
-            background: rgba(26, 26, 26, 0.5);
+            background: #1a1a1a;
             color: #555;
             border-color: #333;
             cursor: not-allowed;
@@ -215,16 +216,16 @@
 
         .bet-info {
             position: absolute;
-            bottom: 60px;
+            bottom: 25px;
             left: 50%;
             transform: translateX(-50%);
             text-align: center;
             color: var(--neon-gold);
-            font-size: 14px;
-            background: rgba(10, 10, 10, 0.7);
-            padding: 10px 20px;
+            font-size: 15px;
+            background: #0a0a0a;
+            padding: 12px 24px;
             border-radius: 20px;
-            border: 1px solid var(--neon-gold);
+            border: 2px solid var(--neon-gold);
             box-shadow: 
                 0 0 20px var(--glow-gold),
                 inset 0 0 10px rgba(255, 215, 0, 0.1);
@@ -236,11 +237,11 @@
             top: 80px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(10, 10, 10, 0.95);
+            background: #0a0a0a;
             color: var(--neon-gold);
             padding: 15px 25px;
             border-radius: 20px;
-            border: 2px solid var(--neon-gold);
+            border: 3px solid var(--neon-gold);
             text-align: center;
             font-size: 16px;
             font-weight: bold;
