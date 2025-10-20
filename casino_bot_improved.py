@@ -8,11 +8,13 @@ import asyncio
 import json
 import time
 import os
+import random  # 🎲 Для генерации случайных чисел на СЕРВЕРЕ
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup, MenuButtonWebApp, BotCommand
 from aiogram.filters import Command
 from database import db
+from rate_limiter import game_rate_limiter, command_rate_limiter  # 🛡️ Защита от спама
 
 # � Загрузка переменных окружения из .env файла
 load_dotenv()
@@ -319,13 +321,26 @@ async def web_app_data(message):
     print("="*60)
     
     try:
+        user_id = message.from_user.id
+        
+        # 🛡️ ЗАЩИТА ОТ СПАМА: Проверяем rate limiting
+        if not game_rate_limiter.is_allowed(user_id):
+            remaining_time = game_rate_limiter.get_remaining_time(user_id)
+            print(f"🚨 СПАМ ОБНАРУЖЕН от пользователя {user_id}! Блокировка на {remaining_time}сек")
+            await message.answer(
+                "🚨 <b>СЛИШКОМ БЫСТРО!</b>\n\n"
+                f"⏱ Подождите {remaining_time} секунд\n\n"
+                "🛡️ Защита от спама активна",
+                parse_mode="HTML"
+            )
+            return
+        
         raw_data = message.web_app_data.data
         print(f"Raw data: {raw_data}")
         
         data = json.loads(raw_data)
         print(f"Parsed data: {data}")
         
-        user_id = message.from_user.id
         print(f"User ID: {user_id}")
         
         if data.get('action') == 'bet_result':
@@ -339,10 +354,10 @@ async def web_app_data(message):
             print(f"📱 Баланс от клиента (НЕ доверяем): {client_balance}")
             
             bet = data.get('bet', 0)
-            multiplier = data.get('multiplier', 1)
+            client_multiplier = data.get('multiplier', 1)
             win = data.get('win', 0)
             
-            print(f"🎲 Ставка: {bet}, Множитель: {multiplier}X, Выигрыш от клиента: {win}")
+            print(f"🎲 Ставка: {bet}, Множитель от клиента (НЕ доверяем): {client_multiplier}X, Выигрыш от клиента: {win}")
             
             # 🛡️ ВАЛИДАЦИЯ 1: Проверяем что ставка не больше баланса
             if bet > current_balance:
@@ -355,19 +370,25 @@ async def web_app_data(message):
                 )
                 return
             
-            # 🛡️ ВАЛИДАЦИЯ 2: Проверяем множитель (максимум 10X)
-            if multiplier < 1 or multiplier > 10:
-                print(f"🚨 ЧИТЕР ОБНАРУЖЕН! Множитель {multiplier}X недопустим")
+            # 🛡️ ВАЛИДАЦИЯ 2: Проверяем ставку (должна быть 200)
+            if bet != 200:
+                print(f"🚨 ЧИТЕР ОБНАРУЖЕН! Ставка {bet} недопустима (должна быть 200)")
                 await message.answer(
                     "🚨 <b>ОШИБКА ВАЛИДАЦИИ!</b>\n\n"
-                    f"❌ Множитель {multiplier}X недопустим (допустимо: 1-10X)\n\n"
+                    f"❌ Ставка должна быть 200 ⭐\n\n"
                     "🔒 Попытка обмана зафиксирована.",
                     parse_mode="HTML"
                 )
                 return
             
+            # 🎲 КРИТИЧНО: Генерируем множитель НА СЕРВЕРЕ (НЕ доверяем клиенту!)
+            # 10% шанс джекпота (10X), 90% - обычный выигрыш (1X)
+            server_multiplier = random.choices([1, 10], weights=[90, 10])[0]
+            print(f"🎲 СЕРВЕРНЫЙ множитель (СЛУЧАЙНЫЙ): {server_multiplier}X")
+            print(f"📱 Множитель от клиента (ИГНОРИРУЕМ): {client_multiplier}X")
+            
             # 🛡️ ВАЛИДАЦИЯ 3: Пересчитываем выигрыш на СЕРВЕРЕ (НЕ доверяем клиенту!)
-            server_win = bet * multiplier
+            server_win = bet * server_multiplier
             print(f"💰 Выигрыш пересчитан на сервере: {server_win}")
             
             if abs(server_win - win) > 1:  # Допускаем погрешность в 1 звезду
@@ -390,7 +411,7 @@ async def web_app_data(message):
             webapp_url = f"{WEB_APP_URL}?balance={new_balance}"
             web_app = WebAppInfo(url=webapp_url)
             
-            if multiplier == 10:
+            if server_multiplier == 10:
                 # Джекпот!
                 keyboard = InlineKeyboardMarkup(inline_keyboard=[
                     [InlineKeyboardButton(text="🎉 ИГРАТЬ ПОСЛЕ ДЖЕКПОТА!", web_app=web_app)],
@@ -399,7 +420,7 @@ async def web_app_data(message):
                 await message.answer(
                     f"🎉 <b>ПОЗДРАВЛЯЕМ! ДЖЕКПОТ!</b> 🎉\n\n"
                     f"💰 Ставка: {bet} ⭐\n"
-                    f"🎲 Множитель: <b>{multiplier}X</b>\n"
+                    f"🎲 Множитель: <b>{server_multiplier}X</b>\n"
                     f"💎 Выигрыш: <b>{server_win} ⭐</b>\n"
                     f"🏦 Новый баланс: <b>{new_balance} ⭐</b>\n\n"
                     f"🍀 Продолжить игру?",
@@ -414,7 +435,7 @@ async def web_app_data(message):
                 await message.answer(
                     f"🎰 <b>Результат игры:</b>\n\n"
                     f"💰 Ставка: {bet} ⭐\n"
-                    f"🎲 Множитель: {multiplier}X\n"
+                    f"🎲 Множитель: {server_multiplier}X\n"
                     f"💵 Выигрыш: {server_win} ⭐\n"
                     f"🏦 Баланс: <b>{new_balance} ⭐</b>\n\n"
                     f"🎮 Играем еще?",

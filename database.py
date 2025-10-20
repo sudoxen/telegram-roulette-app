@@ -35,12 +35,14 @@ class UserDatabase:
             return dict(row) if row else None
     
     async def create_user(self, user_id: int, username: str = None, first_name: str = None) -> dict:
-        """Создать нового пользователя"""
+        """Создать нового пользователя с начальным балансом 1000 ⭐"""
         async with aiosqlite.connect(self.db_path) as db:
+            # 🎁 Стартовый бонус: 1000 звёзд для новых игроков!
+            initial_balance = 1000
             await db.execute("""
                 INSERT INTO users (user_id, username, first_name, balance)
-                VALUES (?, ?, ?, 0)
-            """, (user_id, username, first_name))
+                VALUES (?, ?, ?, ?)
+            """, (user_id, username, first_name, initial_balance))
             await db.commit()
             
             # Возвращаем созданного пользователя
@@ -59,7 +61,12 @@ class UserDatabase:
         return user['balance'] if user else 0
     
     async def update_balance(self, user_id: int, new_balance: int):
-        """Обновить баланс пользователя"""
+        """Обновить баланс пользователя с защитой от отрицательных значений"""
+        # 🛡️ ЗАЩИТА: Баланс не может быть отрицательным!
+        if new_balance < 0:
+            print(f"⚠️ ПРЕДУПРЕЖДЕНИЕ: Попытка установить отрицательный баланс {new_balance} для пользователя {user_id}")
+            new_balance = 0
+        
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute("""
                 UPDATE users 
