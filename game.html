@@ -474,21 +474,14 @@
                 }
             }
             
-            // Метод 3: Из localStorage (ТОЛЬКО если нет от бота)
-            if (!loadedBalance) {
-                const savedBalance = localStorage.getItem('casino_balance');
-                if (savedBalance) {
-                    loadedBalance = parseInt(savedBalance);
-                    balanceSource = 'localStorage';
-                    console.log('⚠️ Баланс из localStorage (может быть устаревшим):', loadedBalance);
-                }
-            }
+            // ❌ НЕ используем localStorage! Баланс ТОЛЬКО из БД!
+            // Если не получили баланс от бота - используем fallback 200
             
-            // Если ничего не получилось - используем 200 по умолчанию
             if (!loadedBalance || isNaN(loadedBalance)) {
                 loadedBalance = 200;
-                balanceSource = 'default';
-                console.log('⚠️ Используем баланс по умолчанию:', loadedBalance);
+                balanceSource = 'fallback (откройте через /start для актуального баланса)';
+                console.warn('⚠️ Используем fallback баланс:', loadedBalance);
+                console.warn('⚠️ Для получения актуального баланса откройте через /start');
             }
             
             console.log('💾 ИСТОЧНИК БАЛАНСА:', balanceSource);
