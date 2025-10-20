@@ -22,17 +22,17 @@ BOT_TOKEN = os.getenv('BOT_TOKEN')
 if not BOT_TOKEN:
     raise ValueError("❌ BOT_TOKEN не найден! Создай файл .env с токеном бота.")
 
-# 🌐 URL Web App (из .env или дефолтный) - Используем app.html для обхода кэша
-WEB_APP_URL = os.getenv('WEB_APP_URL', 'https://sudoxen.github.io/telegram-roulette-app/app.html')
+# 🌐 URL Web App (из .env или дефолтный)
+WEB_APP_URL = os.getenv('WEB_APP_URL', 'https://sudoxen.github.io/telegram-roulette-app/game.html')
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 def get_webapp_url(balance, user_id):
-    """Генерирует URL Web App с актуальным балансом и версией"""
-    timestamp = int(time.time())
-    # Добавляем баланс в URL и в хэш для надежности + уникальный timestamp для обхода кэша
-    return f"{WEB_APP_URL}?balance={balance}&user_id={user_id}&v=2&t={timestamp}#balance={balance}"
+    """Генерирует URL Web App - БЕЗ параметров, баланс передаём через start_param в кнопке"""
+    # Telegram УДАЛЯЕТ query параметры! Используем только базовый URL
+    # Баланс передаётся через web_app.url + start_param в keyboard кнопке
+    return WEB_APP_URL
 
 @dp.message(Command("start"))
 async def start_command(message):
@@ -45,8 +45,9 @@ async def start_command(message):
     user = await db.get_or_create_user(user_id, username, first_name)
     balance = user['balance']
     
-    # Создаем кнопку с Web App с передачей баланса и версией
-    webapp_url = get_webapp_url(balance, user_id)
+    # Создаем кнопку с Web App
+    # ВАЖНО: передаём баланс через URL параметр (Telegram его передаст как start_param)
+    webapp_url = f"{WEB_APP_URL}?balance={balance}"
     web_app = WebAppInfo(url=webapp_url)
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎰 Играть в рулетку", web_app=web_app)],
@@ -54,6 +55,9 @@ async def start_command(message):
         [InlineKeyboardButton(text="📊 Моя статистика", callback_data="stats")],
         [InlineKeyboardButton(text="🏆 Топ игроков", callback_data="top")]
     ])
+    
+    print(f"🌐 Отправляем Web App URL: {webapp_url}")
+    print(f"💰 Баланс пользователя {user_id}: {balance} ⭐")
     
     await message.answer(
         f"🎉 Привет, {first_name}!\n\n"
@@ -76,17 +80,20 @@ async def play_command(message):
             "😔 <b>Недостаточно средств!</b>\n\n"
             f"💰 Ваш баланс: {balance} ⭐\n"
             f"🎯 Нужно минимум: 200 ⭐\n\n"
-            f"💡 Используйте /reset для получения 0 ⭐",
+            f"💡 Используйте /reset для получения 1000 ⭐",
             parse_mode="HTML"
         )
         return
     
-    webapp_url = get_webapp_url(balance, user_id)
+    webapp_url = f"{WEB_APP_URL}?balance={balance}"
     web_app = WebAppInfo(url=webapp_url)
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🚀 ИГРАТЬ СЕЙЧАС!", web_app=web_app)],
         [InlineKeyboardButton(text="💰 Баланс", callback_data="balance")]
     ])
+    
+    print(f"🌐 /play - Отправляем Web App URL: {webapp_url}")
+    print(f"💰 Баланс пользователя {user_id}: {balance} ⭐")
     
     await message.answer(
         f"🎯 <b>Готовы к игре?</b>\n\n"
@@ -307,21 +314,37 @@ async def reset_cancel_callback(callback):
 @dp.message(F.web_app_data)
 async def web_app_data(message):
     """Обработка данных от Web App"""
+    print("\n" + "="*60)
+    print("📥 ПОЛУЧЕНЫ ДАННЫЕ ОТ WEB APP!")
+    print("="*60)
+    
     try:
-        data = json.loads(message.web_app_data.data)
+        raw_data = message.web_app_data.data
+        print(f"Raw data: {raw_data}")
+        
+        data = json.loads(raw_data)
+        print(f"Parsed data: {data}")
+        
         user_id = message.from_user.id
+        print(f"User ID: {user_id}")
         
         if data.get('action') == 'bet_result':
+            print("✅ Действие: bet_result")
+            
             # Обновляем баланс пользователя
             new_balance = data.get('balance', 0)
+            print(f"💰 Обновляем баланс на: {new_balance}")
             await db.update_balance(user_id, new_balance)
             
             bet = data.get('bet', 0)
             multiplier = data.get('multiplier', 1)
             win = data.get('win', 0)
             
+            print(f"🎲 Ставка: {bet}, Множитель: {multiplier}X, Выигрыш: {win}")
+            
             # Записываем статистику ставки
             await db.record_bet(user_id, bet, win)
+            print("✅ Статистика записана в БД")
             
             # Создаем кнопку для продолжения игры
             webapp_url = get_webapp_url(new_balance, user_id)

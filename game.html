@@ -451,42 +451,49 @@
             
             // Пытаемся получить баланс из start_param (если бот передал)
             let loadedBalance = null;
+            let balanceSource = 'default';
             
-            // Метод 1: Из start_param в Telegram
-            if (tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
+            // Метод 1: Из URL query параметров (ПРИОРИТЕТ - от бота!)
+            const urlParams = new URLSearchParams(window.location.search);
+            const balanceParam = urlParams.get('balance');
+            if (balanceParam) {
+                loadedBalance = parseInt(balanceParam);
+                balanceSource = 'URL';
+                console.log('✅ Баланс из URL (от бота):', loadedBalance);
+            }
+            
+            // Метод 2: Из start_param в Telegram
+            if (!loadedBalance && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
                 const startParam = tg.initDataUnsafe.start_param;
                 console.log('start_param:', startParam);
                 // Формат: balance_200
                 if (startParam.startsWith('balance_')) {
                     loadedBalance = parseInt(startParam.replace('balance_', ''));
+                    balanceSource = 'start_param';
                     console.log('✅ Баланс из start_param:', loadedBalance);
                 }
             }
             
-            // Метод 2: Из URL query параметров (fallback)
-            if (!loadedBalance) {
-                const urlParams = new URLSearchParams(window.location.search);
-                const balanceParam = urlParams.get('balance');
-                if (balanceParam) {
-                    loadedBalance = parseInt(balanceParam);
-                    console.log('✅ Баланс из URL:', loadedBalance);
-                }
-            }
-            
-            // Метод 3: Из localStorage (если играл раньше)
+            // Метод 3: Из localStorage (ТОЛЬКО если нет от бота)
             if (!loadedBalance) {
                 const savedBalance = localStorage.getItem('casino_balance');
                 if (savedBalance) {
                     loadedBalance = parseInt(savedBalance);
-                    console.log('✅ Баланс из localStorage:', loadedBalance);
+                    balanceSource = 'localStorage';
+                    console.log('⚠️ Баланс из localStorage (может быть устаревшим):', loadedBalance);
                 }
             }
             
             // Если ничего не получилось - используем 200 по умолчанию
             if (!loadedBalance || isNaN(loadedBalance)) {
                 loadedBalance = 200;
+                balanceSource = 'default';
                 console.log('⚠️ Используем баланс по умолчанию:', loadedBalance);
             }
+            
+            console.log('💾 ИСТОЧНИК БАЛАНСА:', balanceSource);
+            console.log('💰 ФИНАЛЬНЫЙ БАЛАНС:', loadedBalance);
+            console.log('=== КОНЕЦ ЗАГРУЗКИ БАЛАНСА ===');
             
             updateBalance(loadedBalance);
             updateStatus('✅ Готово', '#00d9ff');
