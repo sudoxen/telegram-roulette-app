@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест отправки данных</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+        }
+        button {
+            background: #ffd700;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            display: block;
+            width: 90%;
+        }
+        .log {
+            background: #1a1a1a;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 12px;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Тест отправки данных боту</h1>
+    
+    <div id="info" class="log"></div>
+    
+    <button onclick="testSendData()">📤 Отправить тестовые данные</button>
+    <button onclick="testWithMainButton()">📤 Отправить через MainButton</button>
+    <button onclick="testClose()">🚪 Закрыть Web App</button>
+    
+    <div id="logs" class="log"></div>
+    
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        let logText = '';
+        
+        function log(message) {
+            console.log(message);
+            logText += message + '\n';
+            document.getElementById('logs').textContent = logText;
+        }
+        
+        // Показываем информацию о Web App
+        document.getElementById('info').innerHTML = `
+            <b>📱 Telegram Web App Info:</b><br>
+            • initData: ${tg.initData ? 'Есть ✅' : 'НЕТ ❌'}<br>
+            • User ID: ${tg.initDataUnsafe?.user?.id || 'НЕТ'}<br>
+            • Username: @${tg.initDataUnsafe?.user?.username || 'НЕТ'}<br>
+            • sendData доступен: ${typeof tg.sendData === 'function' ? 'ДА ✅' : 'НЕТ ❌'}<br>
+            • MainButton доступен: ${tg.MainButton ? 'ДА ✅' : 'НЕТ ❌'}<br>
+            • close доступен: ${typeof tg.close === 'function' ? 'ДА ✅' : 'НЕТ ❌'}
+        `;
+        
+        function testSendData() {
+            log('=== ТЕСТ 1: tg.sendData() ===');
+            
+            const testData = {
+                action: 'test',
+                message: 'Привет от Web App!',
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                if (tg && typeof tg.sendData === 'function') {
+                    const dataString = JSON.stringify(testData);
+                    log('Данные: ' + dataString);
+                    
+                    tg.sendData(dataString);
+                    log('✅ sendData() вызван');
+                    
+                    log('⏱ Закрываем через 2 секунды...');
+                    setTimeout(() => {
+                        log('🚪 Закрываем Web App...');
+                        tg.close();
+                    }, 2000);
+                } else {
+                    log('❌ sendData недоступен!');
+                }
+            } catch (error) {
+                log('❌ ОШИБКА: ' + error.message);
+            }
+        }
+        
+        function testWithMainButton() {
+            log('=== ТЕСТ 2: MainButton ===');
+            
+            const testData = {
+                action: 'test_mainbutton',
+                message: 'Отправка через MainButton',
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                if (tg.MainButton) {
+                    const dataString = JSON.stringify(testData);
+                    log('Данные: ' + dataString);
+                    
+                    tg.sendData(dataString);
+                    log('✅ sendData() вызван');
+                    
+                    tg.MainButton.setText('✅ Готово - нажмите для закрытия');
+                    tg.MainButton.show();
+                    tg.MainButton.onClick(() => {
+                        log('MainButton нажата');
+                        tg.close();
+                    });
+                } else {
+                    log('❌ MainButton недоступен!');
+                }
+            } catch (error) {
+                log('❌ ОШИБКА: ' + error.message);
+            }
+        }
+        
+        function testClose() {
+            log('🚪 Закрываем Web App...');
+            try {
+                tg.close();
+            } catch (error) {
+                log('❌ ОШИБКА: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
